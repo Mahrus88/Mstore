@@ -1,34 +1,48 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart'; // Import untuk akses variabel registeredName
+import 'login_screen.dart'; 
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // --- TAMBAHAN: Ambil nama dari variabel pendaftaran ---
+    // Inisialisasi data profil dari variabel global
     String namaTampil = registeredName ?? "Mahrus Ali";
     String emailTampil = registeredEmail ?? "mahrus@mstore.com";
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Profil Saya"), backgroundColor: Colors.blue),
+      appBar: AppBar(
+        title: const Text("Profil Saya"), 
+        backgroundColor: Colors.blue
+      ),
       body: Column(
         children: [
           const SizedBox(height: 30),
-          const Center(child: CircleAvatar(radius: 50, child: Icon(Icons.person, size: 50))),
+          const Center(
+            child: CircleAvatar(
+              radius: 50, 
+              child: Icon(Icons.person, size: 50)
+            )
+          ),
           const SizedBox(height: 15),
-          
-          // --- DIUBAH DIKIT: Biar namanya dinamis ---
-          Text(namaTampil, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-          Text(emailTampil, style: const TextStyle(color: Colors.grey)),
-          
+          Text(
+            namaTampil, 
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)
+          ),
+          Text(
+            emailTampil, 
+            style: const TextStyle(color: Colors.grey)
+          ),
           const SizedBox(height: 30),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text("Logout / Ganti Akun", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            title: const Text(
+              "Logout / Ganti Akun", 
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
+            ),
             onTap: () {
-              // --- TAMBAHAN: Dibungkus showDialog biar nanya dulu ---
+              // Dialog konfirmasi keluar
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
@@ -46,7 +60,10 @@ class ProfileScreen extends StatelessWidget {
                           MaterialPageRoute(builder: (context) => const LoginScreen()),
                         );
                       },
-                      child: const Text("YA, KELUAR", style: TextStyle(color: Colors.red)),
+                      child: const Text(
+                        "YA, KELUAR", 
+                        style: TextStyle(color: Colors.red)
+                      ),
                     ),
                   ],
                 ),
