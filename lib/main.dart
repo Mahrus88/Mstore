@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:device_preview/device_preview.dart';
+import 'package:device_preview/device_preview.dart'; // Memastikan package device_preview diimport
 import 'login_screen.dart';
 
 void main() {
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context) => const MyApp(),
+      enabled: !kReleaseMode, // Mengaktifkan device preview di mode debug
+      builder: (context) => const MyApp(), // Membungkus aplikasi utama Anda
     ),
   );
 }
@@ -18,11 +18,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      useInheritedMediaQuery: true,
-      locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
+      title: 'MStore Bakery',
+      useInheritedMediaQuery: true, // Diperlukan agar Device Preview sinkron
+      locale: DevicePreview.locale(context), // Mengatur locale dari Device Preview
+      builder: DevicePreview.appBuilder, // Mengatur builder dari Device Preview
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      theme: ThemeData(
+        primarySwatch: Colors.brown,
+      ),
       home: const LoginScreen(),
     );
   }
