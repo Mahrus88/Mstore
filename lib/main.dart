@@ -1,13 +1,13 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:device_preview/device_preview.dart'; // Memastikan package device_preview diimport
-import 'login_screen.dart';
+import 'package:device_preview/device_preview.dart'; // Memanggil package bingkai HP
+import 'splash_screen.dart';
 
 void main() {
   runApp(
+    // Membungkus aplikasi dengan DevicePreview agar muncul bingkai HP di Chrome
     DevicePreview(
-      enabled: !kReleaseMode, // Mengaktifkan device preview di mode debug
-      builder: (context) => const MyApp(), // Membungkus aplikasi utama Anda
+      enabled: true, // Biarkan true agar bingkai selalu muncul saat run di Chrome
+      builder: (context) => const MyApp(), 
     ),
   );
 }
@@ -19,14 +19,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MStore Bakery',
-      useInheritedMediaQuery: true, // Diperlukan agar Device Preview sinkron
-      locale: DevicePreview.locale(context), // Mengatur locale dari Device Preview
-      builder: DevicePreview.appBuilder, // Mengatur builder dari Device Preview
       debugShowCheckedModeBanner: false,
+      // Konfigurasi wajib agar DevicePreview bisa mengatur layar di Chrome
+      useInheritedMediaQuery: true,
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
       theme: ThemeData(
-        primarySwatch: Colors.brown,
+        scaffoldBackgroundColor: const Color(0xFFFDFBF7),
+        fontFamily: 'Sans-Serif',
       ),
-      home: const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }

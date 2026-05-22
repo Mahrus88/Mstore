@@ -1,103 +1,143 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
+import 'login_screen.dart'; // Wajib import untuk mengambil data SesiUser
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  // Fungsi pop-up tanya konfirmasi keluar untuk Pelanggan
-  void _konfirmasiLogout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Konfirmasi Keluar", style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text("Apakah Anda yakin ingin keluar dari akun Anda?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Batal", style: TextStyle(color: Colors.grey)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-                (route) => false,
-              );
-            },
-            child: const Text("Keluar", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Mengambil email pendaftar secara realtime
+    String emailUser = SesiUser.emailAktif;
+    
+    // Logika mengambil teks nama depan dari email (Misal mahrus@bakery.com jadi Mahrus)
+    String namaUser = emailUser.split('@')[0];
+    namaUser = namaUser[0].toUpperCase() + namaUser.substring(1);
+
     return Scaffold(
       backgroundColor: const Color(0xFFFDFBF7),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 50),
-            Container(
-              padding: const EdgeInsets.all(5),
-              decoration: const BoxDecoration(
-                color: Color(0xFF8D6E63),
-                shape: BoxShape.circle,
-              ),
-              child: const CircleAvatar(
-                radius: 55,
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person_rounded, size: 70, color: Color(0xFF8D6E63)),
-              ),
-            ),
-            const SizedBox(height: 15),
-            const Text(
-              "Mahrus Ali",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF4E342E)),
-            ),
-            const Text(
-              "Pelanggan Setia MStore",
-              style: TextStyle(color: Colors.grey, fontSize: 14),
-            ),
-            const SizedBox(height: 30),
-            Card(
-              color: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              child: const Column(
-                children: [
-                  ListTile(
-                    leading: Icon(Icons.email_outlined, color: Color(0xFF8D6E63)),
-                    title: Text("Email"),
-                    subtitle: Text("mahrus@bakery.com"),
-                  ),
-                  Divider(height: 1),
-                  ListTile(
-                    leading: Icon(Icons.card_membership_rounded, color: Color(0xFF8D6E63)),
-                    title: Text("Status Member"),
-                    subtitle: Text("Gold Member"),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 40),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: OutlinedButton.icon(
-                onPressed: () => _konfirmasiLogout(context), // Menggunakan konfirmasi tanya dulu
-                icon: const Icon(Icons.logout_rounded),
-                label: const Text("KELUAR DARI APLIKASI", style: TextStyle(fontWeight: FontWeight.bold)),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red[700],
-                  side: BorderSide(color: Colors.red[300]!),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              const Center(
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Color(0xFF8D6E63),
+                  child: Icon(Icons.person, size: 55, color: Colors.white),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 15),
+              
+              // SEKARANG MENAMPILKAN DATA DINAMIS PENDAFTAR
+              Text(
+                namaUser, 
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF3E2723)),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                emailUser, 
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              
+              const SizedBox(height: 30),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF8D6E63)),
+                title: const Text("Pesanan Saya", style: TextStyle(fontWeight: FontWeight.w500)),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                onTap: () {},
+              ),
+              ListTile(
+                leading: const Icon(Icons.lock_reset_rounded, color: Color(0xFF8D6E63)),
+                title: const Text("Ubah Password", style: TextStyle(fontWeight: FontWeight.w500)),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                onTap: () {},
+              ),
+              
+              // --- LISTTILE KELUAR AKUN DENGAN DIALOG KONFIRMASI ---
+              ListTile(
+                leading: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                title: const Text("Keluar Akun", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                onTap: () {
+                  // Memunculkan kotak dialog pertanyaan konfirmasi logout
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false, // User wajib memilih salah satu opsi
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        backgroundColor: const Color(0xFFFDFBF7),
+                        title: Row(
+                          children: const [
+                            Icon(Icons.logout_rounded, color: Color(0xFF8D6E63)),
+                            SizedBox(width: 10),
+                            Text(
+                              "Konfirmasi Keluar",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold, 
+                                color: Color(0xFF3E2723),
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                        content: const Text(
+                          "Apakah Anda yakin ingin keluar dari akun MStore Bakery?",
+                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                        ),
+                        actions: [
+                          // Opsi 1: Batal keluar, tutup dialog saja
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFF8D6E63),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context); // Menutup pop-up dialog
+                            },
+                            child: const Text(
+                              "BATAL",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          
+                          // Opsi 2: Benar-benar keluar dari aplikasi
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF3E2723),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context); // Tutup dialognya dulu
+                              
+                              // Menjalankan kode pembersihan sesi milik lu asli
+                              SesiUser.emailAktif = "Pengguna MStore";
+                              
+                              // Lempar user balik ke halaman login utama
+                              Navigator.pushReplacement(
+                                context, 
+                                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                              );
+                            },
+                            child: const Text(
+                              "YA, KELUAR",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
