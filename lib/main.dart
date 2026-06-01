@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:device_preview/device_preview.dart'; // Memanggil package bingkai HP
+import 'package:flutter/services.dart';
 import 'splash_screen.dart';
 
-void main() {
-  runApp(
-    // Membungkus aplikasi dengan DevicePreview agar muncul bingkai HP di Chrome
-    DevicePreview(
-      enabled: true, // Biarkan true agar bingkai selalu muncul saat run di Chrome
-      builder: (context) => const MyApp(), 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Color(0xFFFDFBF7),
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -20,13 +27,19 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'MStore Bakery',
       debugShowCheckedModeBanner: false,
-      // Konfigurasi wajib agar DevicePreview bisa mengatur layar di Chrome
-      useInheritedMediaQuery: true,
-      locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFFFDFBF7),
-        fontFamily: 'Sans-Serif',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF8D6E63),
+          primary: const Color(0xFF8D6E63),
+          secondary: const Color(0xFF3E2723),
+          surface: Colors.white,
+        ),
+        useMaterial3: true,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFF3E2723)),
+          bodyMedium: TextStyle(color: Color(0xFF5D4037)),
+        ),
       ),
       home: const SplashScreen(),
     );

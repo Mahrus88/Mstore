@@ -1,5 +1,18 @@
+// lib/home_screen.dart
 import 'package:flutter/material.dart';
 import 'detail_screen.dart';
+import 'cart_data.dart';
+import 'product_data.dart';
+
+String formatRupiah(double harga) {
+  final formatted = harga
+      .toStringAsFixed(0)
+      .replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+        (m) => '${m[1]}.',
+      );
+  return 'Rp $formatted';
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,94 +23,37 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = "Semua";
+  String _searchQuery = "";
+  final _searchController = TextEditingController();
 
-  // Data menu MStore Bakery dengan link gambar baru yang super stabil untuk web
-  final List<Map<String, dynamic>> menuBakery = [
-    // --- KATEGORI KUE TART ---
-    {
-      "name": "Dark Cocoa Dream", 
-      "price": 24.00, 
-      "rating": 4.9, 
-      "tag": "Terlaris", 
-      "desc": "Kue tart cokelat murni berlapis krim cokelat Belgia yang sangat lumer dan manisnya pas.",
-      "category": "Kue Tart",
-      "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=500&auto=format&fit=crop"
-    },
-    {
-      "name": "Strawberry Chiffon", 
-      "price": 28.50, 
-      "rating": 4.8, 
-      "tag": "Populer", 
-      "desc": "Kue sifon yang sangat lembut dengan balutan krim vanila dan buah stroberi segar di atasnya.",
-      "category": "Kue Tart",
-      "image": "https://images.unsplash.com/photo-1464349172961-10442a8a2596?q=80&w=500&auto=format&fit=crop"
-    },
-    {
-      "name": "Matcha Crepe Cake", 
-      "price": 32.00, 
-      "rating": 4.7, 
-      "tag": "Rekomendasi", 
-      "desc": "Lapisan crepe tipis legendaris dengan olesan krim teh hijau Jepang asli yang harum.",
-      "category": "Kue Tart",
-      "image": "https://images.unsplash.com/photo-1536680465769-a36969fdadf7?q=80&w=500&auto=format&fit=crop"
-    },
+final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
 
-    // --- KATEGORI DONAT ---
-    {
-      "name": "Hibiscus Glaze Donut", 
-      "price": 3.75, 
-      "rating": 4.7, 
-      "tag": "Populer", 
-      "desc": "Donat kentang empuk dengan lapisan gula glaze rasa bunga hibiscus yang manis dan segar.",
-      "category": "Donat",
-      "image": "https://images.unsplash.com/photo-1551024601-bec78aea704b?q=80&w=500&auto=format&fit=crop"
-    },
-    {
-      "name": "Almond Snow Donut", 
-      "price": 4.00, 
-      "rating": 4.8, 
-      "tag": "Baru", 
-      "desc": "Donat donat dengan taburan kacang almond panggang renyah dan taburan gula putih halus.",
-      "category": "Donat",
-      "image": "https://images.unsplash.com/photo-1612240498936-65f5101365d2?q=80&w=500&auto=format&fit=crop"
-    },
-    {
-      "name": "Choco Caviar Donut", 
-      "price": 4.25, 
-      "rating": 4.9, 
-      "tag": "Terlaris", 
-      "desc": "Donat bomboloni isi cokelat lumer padat dengan toping bola-bola cokelat renyah di atasnya.",
-      "category": "Donat",
-      "image": "https://images.unsplash.com/photo-1514517604298-cf80e0fb7f1e?q=80&w=500&auto=format&fit=crop"
-    },
+  List<Map<String, dynamic>> get filteredMenu {
+    List<Map<String, dynamic>> hasil = _selectedCategory == "Semua"
+        ? menuBakery
+        : menuBakery
+              .where((item) => item['category'] == _selectedCategory)
+              .toList();
+    if (_searchQuery.isNotEmpty) {
+      hasil = hasil
+          .where(
+            (item) => item['name'].toString().toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ),
+          )
+          .toList();
+    }
+    return hasil;
+  }
 
-    // --- KATEGORI CROISSANT ---
-    {
-      "name": "Butter Croissant", 
-      "price": 4.50, 
-      "rating": 4.8, 
-      "tag": "Segar dari Oven", 
-      "desc": "Roti croissant klasik Perancis yang super renyah di luar namun sangat lembut di dalam.",
-      "category": "Croissant",
-      "image": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=500&auto=format&fit=crop"
-    },
-    {
-      "name": "Almond Croissant", 
-      "price": 5.50, 
-      "rating": 4.9, 
-      "tag": "Rekomendasi", 
-      "desc": "Croissant gurih yang diisi dengan krim almond manis melimpah dan taburan irisan almond.",
-      "category": "Croissant",
-      "image": "https://images.unsplash.com/photo-1626027170564-92eb5f46487e?q=80&w=500&auto=format&fit=crop"
-    },
-  ];
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> filteredMenu = _selectedCategory == "Semua"
-        ? menuBakery
-        : menuBakery.where((item) => item['category'] == _selectedCategory).toList();
-
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8F4),
       body: SafeArea(
@@ -106,107 +62,304 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Toko
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+                children: const [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text("MStore Bakery", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF3E2723))),
+                    children: [
+                      Text(
+                        "MStore Bakery",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF3E2723),
+                        ),
+                      ),
                       SizedBox(height: 2),
-                      Text("Dipanggang Segar Setiap Pagi", style: TextStyle(color: Color(0xFF8D6E63), fontSize: 11)),
+                      Text(
+                        "Dipanggang Segar Setiap Pagi",
+                        style: TextStyle(
+                          color: Color(0xFF8D6E63),
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
-                  const CircleAvatar(
+                  CircleAvatar(
                     backgroundColor: Color(0xFF8D6E63),
                     radius: 18,
-                    child: Icon(Icons.person_rounded, color: Colors.white, size: 20),
-                  )
+                    child: Icon(
+                      Icons.person_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              // Filter Kategori Bahasa Indonesia
+              // Search Bar
+              TextField(
+                controller: _searchController,
+                onChanged: (val) => setState(() => _searchQuery = val),
+                decoration: InputDecoration(
+                  hintText: "Cari produk bakery...",
+                  hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
+                  prefixIcon: const Icon(
+                    Icons.search_rounded,
+                    color: Color(0xFF8D6E63),
+                  ),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = "");
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 0,
+                    horizontal: 16,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // Filter Kategori
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildCategoryChip("Semua"),
-                    _buildCategoryChip("Kue Tart"),
-                    _buildCategoryChip("Donat"),
-                    _buildCategoryChip("Croissant"),
-                  ],
+                    "Semua",
+                    "Kue Tart",
+                    "Donat",
+                    "Croissant",
+                  ].map((e) => _buildCategoryChip(e)).toList(),
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Grid List Menu
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: filteredMenu.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.76, 
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemBuilder: (context, index) {
-                  final produk = filteredMenu[index];
-                  return GestureDetector(
-                    onTap: () {
-                      // Berpindah ke detail dan mengirim data produk
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(product: produk)));
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              margin: const EdgeInsets.all(6),
-                              width: double.infinity,
-                              clipBehavior: Clip.antiAlias,
-                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(14)),
-                              child: Image.network(
-                                produk['image'],
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, err, stack) => const Center(child: Icon(Icons.bakery_dining_rounded, size: 40, color: Color(0xFF8D6E63))),
-                              ),
-                            ),
+              // Empty state
+              if (filteredMenu.isEmpty)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(40.0),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.search_off_rounded,
+                          size: 60,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          "Produk tidak ditemukan",
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: filteredMenu.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.62,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemBuilder: (context, index) {
+                    final produk = filteredMenu[index];
+                    return GestureDetector(
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailScreen(product: produk),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        );
+                        setState(() {});
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Gambar + Badge Tag
+                            Stack(
                               children: [
-                                Text(produk['name'], maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF3E2723))),
-                                const SizedBox(height: 2),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text("\$${produk['price'].toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF8D6E63), fontSize: 13)),
-                                    Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(color: Color(0xFF3E2723), shape: BoxShape.circle),
-                                      child: const Icon(Icons.add_rounded, size: 14, color: Colors.white),
-                                    )
-                                  ],
-                                )
+                                Container(
+                                  height: 140,
+                                  margin: const EdgeInsets.all(6),
+                                  width: double.infinity,
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Image.network(
+                                    produk['image'],
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (ctx, err, stack) =>
+                                        const Center(
+                                          child: Icon(
+                                            Icons.bakery_dining_rounded,
+                                            size: 40,
+                                            color: Color(0xFF8D6E63),
+                                          ),
+                                        ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 12,
+                                  left: 12,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF3E2723),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      produk['tag'],
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
-                          )
-                        ],
+
+                            // Info Produk
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 10.0,
+                                right: 10.0,
+                                bottom: 10.0,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    produk['name'],
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: Color(0xFF3E2723),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.star_rounded,
+                                        color: Colors.amber,
+                                        size: 12,
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        "${produk['rating']} (${produk['ratingCount']})",
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        formatRupiah(produk['price']),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF8D6E63),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          CartData.tambahItem(
+                                            produk['name'],
+                                            produk['price'],
+                                            produk['image'],
+                                          );
+                                          setState(() {});
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                "${produk['name']} ditambahkan!",
+                                              ),
+                                              backgroundColor: const Color(
+                                                0xFF8D6E63,
+                                              ),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              duration: const Duration(
+                                                seconds: 1,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(5),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFF3E2723),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.add_rounded,
+                                            size: 14,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
             ],
           ),
         ),
@@ -223,13 +376,13 @@ class _HomeScreenState extends State<HomeScreen> {
         selected: isSelected,
         selectedColor: const Color(0xFF8D6E63),
         backgroundColor: const Color(0xFFF5F0EA),
-        labelStyle: TextStyle(color: isSelected ? Colors.white : const Color(0xFF5D4037), fontWeight: FontWeight.bold, fontSize: 12),
+        labelStyle: TextStyle(
+          color: isSelected ? Colors.white : const Color(0xFF5D4037),
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        onSelected: (val) {
-          setState(() {
-            _selectedCategory = label;
-          });
-        },
+        onSelected: (val) => setState(() => _selectedCategory = label),
       ),
     );
   }
