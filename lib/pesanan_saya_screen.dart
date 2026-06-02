@@ -1,7 +1,7 @@
 // lib/pesanan_saya_screen.dart
 import 'package:flutter/material.dart';
 import 'order_data.dart';
-import 'home_screen.dart';
+import 'utils.dart';
 
 class PesananSayaScreen extends StatefulWidget {
   const PesananSayaScreen({super.key});
@@ -26,27 +26,19 @@ class _PesananSayaScreenState extends State<PesananSayaScreen> {
 
   Color _statusColor(String status) {
     switch (status) {
-      case "Diproses":
-        return Colors.orange;
-      case "Dikirim":
-        return Colors.blue;
-      case "Selesai":
-        return Colors.green;
-      default:
-        return Colors.grey;
+      case "Diproses": return Colors.orange;
+      case "Dikirim": return Colors.blue;
+      case "Selesai": return Colors.green;
+      default: return Colors.grey;
     }
   }
 
   IconData _statusIcon(String status) {
     switch (status) {
-      case "Diproses":
-        return Icons.hourglass_top_rounded;
-      case "Dikirim":
-        return Icons.local_shipping_rounded;
-      case "Selesai":
-        return Icons.check_circle_rounded;
-      default:
-        return Icons.info_rounded;
+      case "Diproses": return Icons.hourglass_top_rounded;
+      case "Dikirim": return Icons.local_shipping_rounded;
+      case "Selesai": return Icons.check_circle_rounded;
+      default: return Icons.info_rounded;
     }
   }
 
@@ -105,7 +97,6 @@ class _PesananSayaScreenState extends State<PesananSayaScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Header invoice + status
                             Row(
                               mainAxisAlignment:
                                   MainAxisAlignment.spaceBetween,
@@ -127,11 +118,10 @@ class _PesananSayaScreenState extends State<PesananSayaScreen> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                          _statusIcon(order.status),
+                                      Icon(_statusIcon(order.status),
                                           size: 12,
-                                          color:
-                                              _statusColor(order.status)),
+                                          color: _statusColor(
+                                              order.status)),
                                       const SizedBox(width: 4),
                                       Text(order.status,
                                           style: TextStyle(
@@ -149,11 +139,9 @@ class _PesananSayaScreenState extends State<PesananSayaScreen> {
                                 style: const TextStyle(
                                     fontSize: 11, color: Colors.grey)),
                             const Divider(height: 20),
-
-                            // List item pesanan
                             ...order.items.map((item) => Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: 6),
+                                  padding:
+                                      const EdgeInsets.only(bottom: 6),
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -179,10 +167,7 @@ class _PesananSayaScreenState extends State<PesananSayaScreen> {
                                     ],
                                   ),
                                 )),
-
                             const Divider(height: 16),
-
-                            // Total
                             Row(
                               mainAxisAlignment:
                                   MainAxisAlignment.spaceBetween,
@@ -200,8 +185,6 @@ class _PesananSayaScreenState extends State<PesananSayaScreen> {
                               ],
                             ),
                             const SizedBox(height: 12),
-
-                            // Metode pembayaran
                             Row(
                               children: [
                                 const Icon(Icons.payment_rounded,

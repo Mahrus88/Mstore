@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'cart_data.dart';
-import 'home_screen.dart';
 import 'order_success_screen.dart';
 import 'order_data.dart';
+import 'utils.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});

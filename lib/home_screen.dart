@@ -2,17 +2,9 @@
 import 'package:flutter/material.dart';
 import 'detail_screen.dart';
 import 'cart_data.dart';
+import 'favorite_data.dart';
 import 'product_data.dart';
-
-String formatRupiah(double harga) {
-  final formatted = harga
-      .toStringAsFixed(0)
-      .replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-        (m) => '${m[1]}.',
-      );
-  return 'Rp $formatted';
-}
+import 'utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,24 +18,29 @@ class _HomeScreenState extends State<HomeScreen> {
   String _searchQuery = "";
   final _searchController = TextEditingController();
 
-final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
+  final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
 
   List<Map<String, dynamic>> get filteredMenu {
     List<Map<String, dynamic>> hasil = _selectedCategory == "Semua"
         ? menuBakery
         : menuBakery
-              .where((item) => item['category'] == _selectedCategory)
-              .toList();
+            .where((item) => item['category'] == _selectedCategory)
+            .toList();
     if (_searchQuery.isNotEmpty) {
       hasil = hasil
-          .where(
-            (item) => item['name'].toString().toLowerCase().contains(
-              _searchQuery.toLowerCase(),
-            ),
-          )
+          .where((item) => item['name']
+              .toString()
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase()))
           .toList();
     }
     return hasil;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    FavoriteData.muatFavorit();
   }
 
   @override
@@ -58,7 +55,8 @@ final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
       backgroundColor: const Color(0xFFFBF8F4),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 15.0),
+          padding: const EdgeInsets.symmetric(
+              horizontal: 16.0, vertical: 15.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -69,32 +67,22 @@ final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "MStore Bakery",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF3E2723),
-                        ),
-                      ),
+                      Text("MStore Bakery",
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF3E2723))),
                       SizedBox(height: 2),
-                      Text(
-                        "Dipanggang Segar Setiap Pagi",
-                        style: TextStyle(
-                          color: Color(0xFF8D6E63),
-                          fontSize: 11,
-                        ),
-                      ),
+                      Text("Dipanggang Segar Setiap Pagi",
+                          style: TextStyle(
+                              color: Color(0xFF8D6E63), fontSize: 11)),
                     ],
                   ),
                   CircleAvatar(
                     backgroundColor: Color(0xFF8D6E63),
                     radius: 18,
-                    child: Icon(
-                      Icons.person_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                    child: Icon(Icons.person_rounded,
+                        color: Colors.white, size: 20),
                   ),
                 ],
               ),
@@ -106,17 +94,14 @@ final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
                 onChanged: (val) => setState(() => _searchQuery = val),
                 decoration: InputDecoration(
                   hintText: "Cari produk bakery...",
-                  hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
-                  prefixIcon: const Icon(
-                    Icons.search_rounded,
-                    color: Color(0xFF8D6E63),
-                  ),
+                  hintStyle:
+                      const TextStyle(fontSize: 13, color: Colors.grey),
+                  prefixIcon: const Icon(Icons.search_rounded,
+                      color: Color(0xFF8D6E63)),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(
-                            Icons.close_rounded,
-                            color: Colors.grey,
-                          ),
+                          icon: const Icon(Icons.close_rounded,
+                              color: Colors.grey),
                           onPressed: () {
                             _searchController.clear();
                             setState(() => _searchQuery = "");
@@ -126,9 +111,7 @@ final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
                   filled: true,
                   fillColor: Colors.white,
                   contentPadding: const EdgeInsets.symmetric(
-                    vertical: 0,
-                    horizontal: 16,
-                  ),
+                      vertical: 0, horizontal: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide.none,
@@ -141,12 +124,9 @@ final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: [
-                    "Semua",
-                    "Kue Tart",
-                    "Donat",
-                    "Croissant",
-                  ].map((e) => _buildCategoryChip(e)).toList(),
+                  children: ["Semua", "Kue Tart", "Donat", "Croissant"]
+                      .map((e) => _buildCategoryChip(e))
+                      .toList(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -158,16 +138,12 @@ final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
                     padding: EdgeInsets.all(40.0),
                     child: Column(
                       children: [
-                        Icon(
-                          Icons.search_off_rounded,
-                          size: 60,
-                          color: Colors.grey,
-                        ),
+                        Icon(Icons.search_off_rounded,
+                            size: 60, color: Colors.grey),
                         SizedBox(height: 12),
-                        Text(
-                          "Produk tidak ditemukan",
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
-                        ),
+                        Text("Produk tidak ditemukan",
+                            style: TextStyle(
+                                color: Colors.grey, fontSize: 14)),
                       ],
                     ),
                   ),
@@ -177,21 +153,24 @@ final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: filteredMenu.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.62,
+                    childAspectRatio: 0.72,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),
                   itemBuilder: (context, index) {
                     final produk = filteredMenu[index];
+                    final isFavorit =
+                        FavoriteData.isFavorit(produk['name']);
                     return GestureDetector(
                       onTap: () async {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => DetailScreen(product: produk),
-                          ),
+                              builder: (context) =>
+                                  DetailScreen(product: produk)),
                         );
                         setState(() {});
                       },
@@ -201,152 +180,197 @@ final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3))
                           ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Gambar + Badge Tag
                             Stack(
                               children: [
                                 Container(
-                                  height: 140,
+                                  height: 130,
                                   margin: const EdgeInsets.all(6),
                                   width: double.infinity,
                                   clipBehavior: Clip.antiAlias,
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
+                                      borderRadius:
+                                          BorderRadius.circular(14)),
                                   child: Image.network(
                                     produk['image'],
                                     fit: BoxFit.cover,
-                                    errorBuilder: (ctx, err, stack) =>
-                                        const Center(
-                                          child: Icon(
-                                            Icons.bakery_dining_rounded,
-                                            size: 40,
+                                    loadingBuilder: (context, child,
+                                        loadingProgress) {
+                                      if (loadingProgress == null)
+                                        return child;
+                                      return Container(
+                                        color: const Color(0xFFF5F0EA),
+                                        child: const Center(
+                                          child:
+                                              CircularProgressIndicator(
                                             color: Color(0xFF8D6E63),
+                                            strokeWidth: 2,
                                           ),
                                         ),
+                                      );
+                                    },
+                                    errorBuilder:
+                                        (ctx, err, stack) => Container(
+                                      color: const Color(0xFFF5F0EA),
+                                      child: const Center(
+                                        child: Icon(
+                                            Icons.bakery_dining_rounded,
+                                            size: 40,
+                                            color: Color(0xFF8D6E63)),
+                                      ),
+                                    ),
                                   ),
                                 ),
+                                // Badge tag
                                 Positioned(
                                   top: 12,
                                   left: 12,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 7,
-                                      vertical: 3,
-                                    ),
+                                        horizontal: 7, vertical: 3),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF3E2723),
-                                      borderRadius: BorderRadius.circular(6),
+                                      borderRadius:
+                                          BorderRadius.circular(6),
                                     ),
-                                    child: Text(
-                                      produk['tag'],
-                                      style: const TextStyle(
+                                    child: Text(produk['tag'],
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 9,
+                                            fontWeight:
+                                                FontWeight.bold)),
+                                  ),
+                                ),
+                                // ✅ Tombol favorit
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      await FavoriteData.toggleFavorit(
+                                          produk);
+                                      setState(() {});
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            FavoriteData.isFavorit(
+                                                    produk['name'])
+                                                ? "${produk['name']} ditambahkan ke favorit!"
+                                                : "${produk['name']} dihapus dari favorit",
+                                          ),
+                                          backgroundColor:
+                                              const Color(0xFF8D6E63),
+                                          behavior:
+                                              SnackBarBehavior.floating,
+                                          duration:
+                                              const Duration(seconds: 1),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
                                         color: Colors.white,
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.black
+                                                  .withOpacity(0.1),
+                                              blurRadius: 4)
+                                        ],
+                                      ),
+                                      child: Icon(
+                                        isFavorit
+                                            ? Icons.favorite_rounded
+                                            : Icons
+                                                .favorite_border_rounded,
+                                        size: 14,
+                                        color: isFavorit
+                                            ? Colors.red
+                                            : Colors.grey,
                                       ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-
-                            // Info Produk
                             Padding(
                               padding: const EdgeInsets.only(
-                                left: 10.0,
-                                right: 10.0,
-                                bottom: 10.0,
-                              ),
+                                  left: 10.0,
+                                  right: 10.0,
+                                  bottom: 10.0),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    produk['name'],
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      color: Color(0xFF3E2723),
-                                    ),
-                                  ),
+                                  Text(produk['name'],
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: Color(0xFF3E2723))),
                                   const SizedBox(height: 3),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.star_rounded,
-                                        color: Colors.amber,
-                                        size: 12,
-                                      ),
-                                      const SizedBox(width: 2),
-                                      Text(
+                                  Row(children: [
+                                    const Icon(Icons.star_rounded,
+                                        color: Colors.amber, size: 12),
+                                    const SizedBox(width: 2),
+                                    Text(
                                         "${produk['rating']} (${produk['ratingCount']})",
                                         style: const TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                            fontSize: 10,
+                                            color: Colors.grey)),
+                                  ]),
                                   const SizedBox(height: 5),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        formatRupiah(produk['price']),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF8D6E63),
-                                          fontSize: 12,
-                                        ),
-                                      ),
+                                          formatRupiah(produk['price']),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF8D6E63),
+                                              fontSize: 12)),
                                       GestureDetector(
                                         onTap: () {
                                           CartData.tambahItem(
-                                            produk['name'],
-                                            produk['price'],
-                                            produk['image'],
-                                          );
+                                              produk['name'],
+                                              produk['price'],
+                                              produk['image']);
                                           setState(() {});
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
                                             SnackBar(
                                               content: Text(
-                                                "${produk['name']} ditambahkan!",
-                                              ),
-                                              backgroundColor: const Color(
-                                                0xFF8D6E63,
-                                              ),
-                                              behavior:
-                                                  SnackBarBehavior.floating,
+                                                  "${produk['name']} ditambahkan!"),
+                                              backgroundColor:
+                                                  const Color(0xFF8D6E63),
+                                              behavior: SnackBarBehavior
+                                                  .floating,
                                               duration: const Duration(
-                                                seconds: 1,
-                                              ),
+                                                  seconds: 1),
                                             ),
                                           );
                                         },
                                         child: Container(
-                                          padding: const EdgeInsets.all(5),
+                                          padding:
+                                              const EdgeInsets.all(5),
                                           decoration: const BoxDecoration(
-                                            color: Color(0xFF3E2723),
-                                            shape: BoxShape.circle,
-                                          ),
+                                              color: Color(0xFF3E2723),
+                                              shape: BoxShape.circle),
                                           child: const Icon(
-                                            Icons.add_rounded,
-                                            size: 14,
-                                            color: Colors.white,
-                                          ),
+                                              Icons.add_rounded,
+                                              size: 14,
+                                              color: Colors.white),
                                         ),
                                       ),
                                     ],
@@ -377,12 +401,13 @@ final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
         selectedColor: const Color(0xFF8D6E63),
         backgroundColor: const Color(0xFFF5F0EA),
         labelStyle: TextStyle(
-          color: isSelected ? Colors.white : const Color(0xFF5D4037),
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        onSelected: (val) => setState(() => _selectedCategory = label),
+            color: isSelected ? Colors.white : const Color(0xFF5D4037),
+            fontWeight: FontWeight.bold,
+            fontSize: 12),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10)),
+        onSelected: (val) =>
+            setState(() => _selectedCategory = label),
       ),
     );
   }

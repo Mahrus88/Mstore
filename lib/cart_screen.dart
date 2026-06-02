@@ -1,7 +1,7 @@
 // lib/cart_screen.dart
 import 'package:flutter/material.dart';
 import 'cart_data.dart';
-import 'home_screen.dart';
+import 'utils.dart';
 import 'checkout_screen.dart';
 
 class CartScreen extends StatefulWidget {
@@ -107,7 +107,6 @@ class _CartScreenState extends State<CartScreen> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      // Gambar produk
                       Container(
                         width: 70,
                         height: 70,
@@ -122,8 +121,6 @@ class _CartScreenState extends State<CartScreen> {
                                 color: Color(0xFF8D6E63)),
                       ),
                       const SizedBox(width: 14),
-
-                      // Nama & Harga
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +136,6 @@ class _CartScreenState extends State<CartScreen> {
                                     color: Color(0xFF8D6E63),
                                     fontSize: 12)),
                             const SizedBox(height: 8),
-                            // Kontrol qty
                             Row(
                               children: [
                                 GestureDetector(
@@ -190,8 +186,6 @@ class _CartScreenState extends State<CartScreen> {
                           ],
                         ),
                       ),
-
-                      // Subtotal + Hapus
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -201,7 +195,6 @@ class _CartScreenState extends State<CartScreen> {
                                   color: Color(0xFF3E2723),
                                   fontSize: 13)),
                           const SizedBox(height: 8),
-                          // ✅ TOMBOL HAPUS DENGAN KONFIRMASI
                           GestureDetector(
                             onTap: () {
                               showDialog(
@@ -210,18 +203,15 @@ class _CartScreenState extends State<CartScreen> {
                                   shape: RoundedRectangleBorder(
                                       borderRadius:
                                           BorderRadius.circular(16)),
-                                  title: const Text(
-                                    "Hapus Item?",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF3E2723)),
-                                  ),
+                                  title: const Text("Hapus Item?",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF3E2723))),
                                   content: Text(
-                                    "Hapus \"${item.name}\" dari keranjang?",
-                                    style: const TextStyle(
-                                        color: Colors.black54,
-                                        fontSize: 13),
-                                  ),
+                                      "Hapus \"${item.name}\" dari keranjang?",
+                                      style: const TextStyle(
+                                          color: Colors.black54,
+                                          fontSize: 13)),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
@@ -250,13 +240,12 @@ class _CartScreenState extends State<CartScreen> {
                                         );
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(
-                                                    8)),
-                                      ),
+                                          backgroundColor: Colors.red,
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      8))),
                                       child: const Text("HAPUS",
                                           style: TextStyle(
                                               fontWeight:

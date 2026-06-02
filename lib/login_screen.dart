@@ -7,6 +7,9 @@ import 'register_screen.dart';
 import 'profile_screen.dart';
 import 'cart_screen.dart';
 import 'cart_data.dart';
+import 'order_data.dart';
+import 'favorit_screen.dart';
+import 'utils.dart';
 
 class SesiUser {
   static String emailAktif = "Pengguna MStore";
@@ -46,7 +49,8 @@ class AkunState {
     final prefs = await SharedPreferences.getInstance();
     final List<AkunModel> akunCustom = listAkun
         .where((a) =>
-            a.email != "admin@bakery.com" && a.email != "mahrus@bakery.com")
+            a.email != "admin@bakery.com" &&
+            a.email != "mahrus@bakery.com")
         .toList();
     final String data =
         jsonEncode(akunCustom.map((e) => e.toJson()).toList());
@@ -145,7 +149,8 @@ class _LoginScreenState extends State<LoginScreen> {
           );
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const AdminDashboard()),
+            MaterialPageRoute(
+                builder: (context) => const AdminDashboard()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -157,7 +162,8 @@ class _LoginScreenState extends State<LoginScreen> {
           );
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MainNavigation()),
+            MaterialPageRoute(
+                builder: (context) => const MainNavigation()),
           );
         }
       } else {
@@ -191,16 +197,19 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
         title: const Text("Lupa Password",
             style: TextStyle(
-                fontWeight: FontWeight.bold, color: Color(0xFF3E2723))),
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF3E2723))),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Masukkan email Anda untuk mereset password.",
-                style: TextStyle(color: Colors.black54, fontSize: 13)),
+            const Text(
+                "Masukkan email Anda untuk mereset password.",
+                style:
+                    TextStyle(color: Colors.black54, fontSize: 13)),
             const SizedBox(height: 16),
             TextFormField(
               controller: resetController,
@@ -217,8 +226,8 @@ class _LoginScreenState extends State<LoginScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child:
-                const Text("BATAL", style: TextStyle(color: Colors.grey)),
+            child: const Text("BATAL",
+                style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -271,7 +280,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Color(0xFF4E342E))),
                 const SizedBox(height: 8),
                 const Text("Masuk untuk mulai berbelanja",
-                    style: TextStyle(color: Colors.grey, fontSize: 13)),
+                    style:
+                        TextStyle(color: Colors.grey, fontSize: 13)),
                 const SizedBox(height: 40),
                 TextFormField(
                   controller: _emailController,
@@ -309,7 +319,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   decoration: InputDecoration(
                     labelText: "Kata Sandi",
-                    prefixIcon: const Icon(Icons.lock_outline_rounded,
+                    prefixIcon: const Icon(
+                        Icons.lock_outline_rounded,
                         color: Color(0xFF8D6E63)),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -318,8 +329,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             : Icons.visibility,
                         color: const Color(0xFF8D6E63),
                       ),
-                      onPressed: () => setState(
-                          () => _isPasswordVisible = !_isPasswordVisible),
+                      onPressed: () => setState(() =>
+                          _isPasswordVisible = !_isPasswordVisible),
                     ),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15)),
@@ -359,7 +370,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             height: 22,
                             width: 22,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2.5),
+                                color: Colors.white,
+                                strokeWidth: 2.5),
                           )
                         : const Text("MASUK KE TOKO",
                             style: TextStyle(
@@ -378,7 +390,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const RegisterScreen()),
+                            builder: (context) =>
+                                const RegisterScreen()),
                       ),
                       child: const Text("Daftar Sekarang",
                           style: TextStyle(
@@ -396,23 +409,486 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class AdminDashboard extends StatelessWidget {
+// ── Admin Dashboard ──
+class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
+
+  @override
+  State<AdminDashboard> createState() => _AdminDashboardState();
+}
+
+class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFDFBF7),
       appBar: AppBar(
-        title: const Text("MStore Admin Panel"),
+        title: const Text("Admin Panel",
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF8D6E63),
         foregroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout_rounded),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const LoginScreen()),
+              );
+            },
+          )
+        ],
       ),
-      body: const Center(child: Text("Panel Admin Aktif")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header selamat datang
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF8D6E63),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text("Selamat Datang,",
+                      style: TextStyle(
+                          color: Colors.white70, fontSize: 13)),
+                  SizedBox(height: 4),
+                  Text("Admin MStore Bakery 🍞",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4),
+                  Text("Kelola toko Anda dari sini",
+                      style: TextStyle(
+                          color: Colors.white70, fontSize: 12)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Statistik
+            const Text("Statistik Toko",
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3E2723))),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatCard(
+                    "Total Produk",
+                    "8",
+                    Icons.inventory_2_rounded,
+                    const Color(0xFF8D6E63),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStatCard(
+                    "Total Akun",
+                    "${AkunState.listAkun.length}",
+                    Icons.people_rounded,
+                    Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatCard(
+                    "Kategori",
+                    "3",
+                    Icons.category_rounded,
+                    Colors.orange,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStatCard(
+                    "Total Pesanan",
+                    "${OrderData.daftarPesanan.length}",
+                    Icons.shopping_bag_rounded,
+                    const Color(0xFF3E2723),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // Menu Admin
+            const Text("Menu Admin",
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3E2723))),
+            const SizedBox(height: 12),
+            _buildAdminMenu(
+              icon: Icons.people_rounded,
+              title: "Kelola Akun Pengguna",
+              subtitle:
+                  "${AkunState.listAkun.length} akun terdaftar",
+              onTap: () => _showDaftarAkun(context),
+            ),
+            const SizedBox(height: 10),
+            _buildAdminMenu(
+              icon: Icons.inventory_2_rounded,
+              title: "Daftar Produk",
+              subtitle: "8 produk aktif",
+              onTap: () => _showDaftarProduk(context),
+            ),
+            const SizedBox(height: 10),
+            _buildAdminMenu(
+              icon: Icons.shopping_bag_rounded,
+              title: "Semua Pesanan",
+              subtitle: "Lihat semua pesanan masuk",
+              onTap: () => _showSemuaPesanan(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+      String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2))
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(value,
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: color)),
+              Text(label,
+                  style: const TextStyle(
+                      fontSize: 11, color: Colors.grey)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdminMenu({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2))
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF8D6E63).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon,
+                  color: const Color(0xFF8D6E63), size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Color(0xFF3E2723))),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: const TextStyle(
+                          fontSize: 11, color: Colors.grey)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded,
+                size: 14, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDaftarAkun(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (ctx, scrollController) => Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text("Daftar Akun Pengguna",
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3E2723))),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: ListView.builder(
+                controller: scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: AkunState.listAkun.length,
+                itemBuilder: (context, index) {
+                  final akun = AkunState.listAkun[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: const Color(0xFF8D6E63)
+                          .withOpacity(0.12),
+                      child: Icon(
+                        akun.email == "admin@bakery.com"
+                            ? Icons.admin_panel_settings_rounded
+                            : Icons.person_rounded,
+                        color: const Color(0xFF8D6E63),
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(akun.email,
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500)),
+                    subtitle: Text(
+                      akun.email == "admin@bakery.com"
+                          ? "Admin"
+                          : "Pelanggan",
+                      style: TextStyle(
+                          fontSize: 11,
+                          color:
+                              akun.email == "admin@bakery.com"
+                                  ? Colors.orange
+                                  : Colors.green),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDaftarProduk(BuildContext context) {
+    final List<Map<String, dynamic>> produk = [
+      {"name": "Dark Cocoa Dream", "harga": "Rp 240.000", "kategori": "Kue Tart"},
+      {"name": "Strawberry Chiffon", "harga": "Rp 285.000", "kategori": "Kue Tart"},
+      {"name": "Matcha Crepe Cake", "harga": "Rp 320.000", "kategori": "Kue Tart"},
+      {"name": "Hibiscus Glaze Donut", "harga": "Rp 37.500", "kategori": "Donat"},
+      {"name": "Almond Snow Donut", "harga": "Rp 40.000", "kategori": "Donat"},
+      {"name": "Choco Caviar Donut", "harga": "Rp 42.500", "kategori": "Donat"},
+      {"name": "Butter Croissant", "harga": "Rp 45.000", "kategori": "Croissant"},
+      {"name": "Almond Croissant", "harga": "Rp 55.000", "kategori": "Croissant"},
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (ctx, scrollController) => Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text("Daftar Produk",
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3E2723))),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: ListView.builder(
+                controller: scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: produk.length,
+                itemBuilder: (context, index) {
+                  final p = produk[index];
+                  return ListTile(
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF8D6E63)
+                            .withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                          Icons.bakery_dining_rounded,
+                          color: Color(0xFF8D6E63),
+                          size: 20),
+                    ),
+                    title: Text(p['name'],
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500)),
+                    subtitle: Text(p['kategori'],
+                        style: const TextStyle(
+                            fontSize: 11, color: Colors.grey)),
+                    trailing: Text(p['harga'],
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8D6E63),
+                            fontWeight: FontWeight.bold)),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSemuaPesanan(BuildContext context) async {
+    await OrderData.muatPesanan();
+    if (!context.mounted) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (ctx, scrollController) => Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text("Semua Pesanan",
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3E2723))),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: OrderData.daftarPesanan.isEmpty
+                  ? const Center(
+                      child: Text("Belum ada pesanan masuk",
+                          style: TextStyle(color: Colors.grey)))
+                  : ListView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: OrderData.daftarPesanan.length,
+                      itemBuilder: (context, index) {
+                        final order =
+                            OrderData.daftarPesanan[index];
+                        return ListTile(
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF8D6E63)
+                                  .withOpacity(0.12),
+                              borderRadius:
+                                  BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                                Icons.receipt_long_rounded,
+                                color: Color(0xFF8D6E63),
+                                size: 20),
+                          ),
+                          title: Text(order.invoiceNumber,
+                              style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500)),
+                          subtitle: Text(
+                              "${order.tanggal}  •  ${order.items.length} item",
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey)),
+                          trailing: Text(
+                            formatRupiah(order.totalBayar),
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF8D6E63),
+                                fontWeight: FontWeight.bold),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
+// ── Main Navigation ──
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
+
   @override
   State<MainNavigation> createState() => _MainNavigationState();
 }
@@ -422,6 +898,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _pages = [
     const HomeScreen(),
     const CartScreen(),
+    const FavoritScreen(),
     const ProfileScreen(),
   ];
 
@@ -438,7 +915,9 @@ class _MainNavigationState extends State<MainNavigation> {
             unselectedItemColor: Colors.grey,
             backgroundColor: Colors.white,
             elevation: 12,
-            onTap: (index) => setState(() => _currentIndex = index),
+            type: BottomNavigationBarType.fixed,
+            onTap: (index) =>
+                setState(() => _currentIndex = index),
             items: [
               const BottomNavigationBarItem(
                 icon: Icon(Icons.home_rounded),
@@ -455,7 +934,8 @@ class _MainNavigationState extends State<MainNavigation> {
                         child: Container(
                           padding: const EdgeInsets.all(2),
                           decoration: const BoxDecoration(
-                              color: Colors.red, shape: BoxShape.circle),
+                              color: Colors.red,
+                              shape: BoxShape.circle),
                           constraints: const BoxConstraints(
                               minWidth: 14, minHeight: 14),
                           child: Text(
@@ -471,6 +951,10 @@ class _MainNavigationState extends State<MainNavigation> {
                   ],
                 ),
                 label: "Keranjang",
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.favorite_rounded),
+                label: "Favorit",
               ),
               const BottomNavigationBarItem(
                 icon: Icon(Icons.person_rounded),
