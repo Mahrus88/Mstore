@@ -1,23 +1,125 @@
 // lib/profile_screen.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 import 'cart_data.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-// ignore: unused_import
 import 'pesanan_saya_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    String emailUser = SesiUser.emailAktif;
-    String namaUser =
-        emailUser.contains('@') ? emailUser.split('@')[0] : emailUser;
-    namaUser = namaUser.isNotEmpty
-        ? namaUser[0].toUpperCase() + namaUser.substring(1)
-        : "User";
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
+class _ProfileScreenState extends State<ProfileScreen> {
+  String _namaUser = "";
+  String _emailUser = "";
+  String? _fotoPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _muatProfil();
+  }
+
+  Future<void> _muatProfil() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _emailUser = SesiUser.emailAktif;
+      // ✅ Ambil nama tersimpan, kalau belum ada pakai nama dari email
+      String namaDefault = _emailUser.contains('@')
+          ? _emailUser.split('@')[0]
+          : _emailUser;
+      namaDefault = namaDefault.isNotEmpty
+          ? namaDefault[0].toUpperCase() + namaDefault.substring(1)
+          : "User";
+      _namaUser = prefs.getString('nama_user_${_emailUser}') ?? namaDefault;
+      _fotoPath = prefs.getString('foto_profil_${_emailUser}');
+    });
+  }
+
+  Future<void> _pilihFoto() async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            const Text("Pilih Foto Profil",
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3E2723))),
+            const SizedBox(height: 12),
+            ListTile(
+              leading: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8D6E63).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.camera_alt_rounded,
+                    color: Color(0xFF8D6E63)),
+              ),
+              title: const Text("Ambil dari Kamera"),
+              onTap: () {
+                Navigator.pop(ctx);
+                _ambilFoto(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8D6E63).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.photo_library_rounded,
+                    color: Color(0xFF8D6E63)),
+              ),
+              title: const Text("Pilih dari Galeri"),
+              onTap: () {
+                Navigator.pop(ctx);
+                _ambilFoto(ImageSource.gallery);
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _ambilFoto(ImageSource source) async {
+    final picker = ImagePicker();
+    final XFile? foto =
+        await picker.pickImage(source: source, imageQuality: 70);
+    if (foto != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('foto_profil_${_emailUser}', foto.path);
+      setState(() => _fotoPath = foto.path);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Foto profil berhasil diperbarui!"),
+            backgroundColor: Color(0xFF8D6E63),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFDFBF7),
       body: SafeArea(
@@ -37,37 +139,49 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 48,
-                          backgroundColor: Colors.white.withOpacity(0.3),
-                          child: const Icon(Icons.person,
-                              size: 52, color: Colors.white),
-                        ),
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF3E2723),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.camera_alt_rounded,
-                                size: 16, color: Colors.white),
+                    // ✅ Foto profil bisa diklik
+                    GestureDetector(
+                      onTap: _pilihFoto,
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 48,
+                            backgroundColor:
+                                Colors.white.withOpacity(0.3),
+                            backgroundImage: _fotoPath != null
+                                ? FileImage(File(_fotoPath!))
+                                : null,
+                            child: _fotoPath == null
+                                ? const Icon(Icons.person,
+                                    size: 52, color: Colors.white)
+                                : null,
                           ),
-                        ),
-                      ],
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF3E2723),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                  Icons.camera_alt_rounded,
+                                  size: 14,
+                                  color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    Text(namaUser,
+                    Text(_namaUser,
                         style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.white)),
                     const SizedBox(height: 4),
-                    Text(emailUser,
+                    Text(_emailUser,
                         style: const TextStyle(
                             fontSize: 13, color: Colors.white70)),
                   ],
@@ -87,8 +201,9 @@ class ProfileScreen extends StatelessWidget {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const PesananSayaScreen()),
-                        ),
+                              builder: (context) =>
+                                  const PesananSayaScreen()),
+                        ).then((_) => _muatProfil()),
                       ),
                       _buildDivider(),
                       _buildMenuItem(
@@ -98,7 +213,8 @@ class ProfileScreen extends StatelessWidget {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const AlamatScreen()),
+                              builder: (context) =>
+                                  const AlamatScreen()),
                         ),
                       ),
                     ]),
@@ -108,7 +224,7 @@ class ProfileScreen extends StatelessWidget {
                         icon: Icons.person_outline_rounded,
                         title: "Edit Profil",
                         subtitle: "Ubah nama & informasi akun",
-                        onTap: () => _showEditProfil(context, namaUser),
+                        onTap: () => _showEditProfil(context),
                       ),
                       _buildDivider(),
                       _buildMenuItem(
@@ -174,7 +290,8 @@ class ProfileScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: Container(
         width: 38,
         height: 38,
@@ -182,8 +299,8 @@ class ProfileScreen extends StatelessWidget {
           color: (iconColor ?? const Color(0xFF8D6E63)).withOpacity(0.12),
           borderRadius: BorderRadius.circular(10),
         ),
-        child:
-            Icon(icon, color: iconColor ?? const Color(0xFF8D6E63), size: 20),
+        child: Icon(icon,
+            color: iconColor ?? const Color(0xFF8D6E63), size: 20),
       ),
       title: Text(title,
           style: TextStyle(
@@ -200,8 +317,9 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showEditProfil(BuildContext context, String namaAwal) {
-    final namaController = TextEditingController(text: namaAwal);
+  // ✅ Edit profil yang benar-benar tersimpan dan langsung update tampilan
+  void _showEditProfil(BuildContext context) {
+    final namaController = TextEditingController(text: _namaUser);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -229,8 +347,13 @@ class ProfileScreen extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: "Nama",
                 prefixIcon: const Icon(Icons.person_outline_rounded),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF8D6E63), width: 2),
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -238,14 +361,18 @@ class ProfileScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  // Simpan nama ke SharedPreferences
+                  if (namaController.text.trim().isEmpty) return;
                   final prefs = await SharedPreferences.getInstance();
+                  // ✅ Simpan nama berdasarkan email aktif
                   await prefs.setString(
-                      'nama_user', namaController.text.trim());
+                      'nama_user_${_emailUser}',
+                      namaController.text.trim());
+                  // ✅ Update langsung di UI
+                  setState(() => _namaUser = namaController.text.trim());
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text("Profil berhasil diperbarui!"),
+                      content: Text("Nama berhasil diperbarui!"),
                       backgroundColor: Color(0xFF8D6E63),
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -259,7 +386,8 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 child: const Text("SIMPAN",
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -268,134 +396,165 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  // ✅ Ubah password yang benar-benar berfungsi
   void _showUbahPassword(BuildContext context) {
     final oldPass = TextEditingController();
     final newPass = TextEditingController();
     final confirmPass = TextEditingController();
+    bool oldVisible = false;
+    bool newVisible = false;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: 24,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Ubah Password",
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF3E2723))),
-            const SizedBox(height: 20),
-            TextField(
-              controller: oldPass,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: "Password Lama",
-                prefixIcon: const Icon(Icons.lock_outline_rounded),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: newPass,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: "Password Baru",
-                prefixIcon: const Icon(Icons.lock_reset_rounded),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: confirmPass,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: "Konfirmasi Password Baru",
-                prefixIcon: const Icon(Icons.lock_rounded),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Cari akun yang sedang login
-                  final index = AkunState.listAkun
-                      .indexWhere((a) => a.email == SesiUser.emailAktif);
-                  if (index == -1) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text("Akun tidak ditemukan."),
-                          backgroundColor: Colors.red),
-                    );
-                    return;
-                  }
-                  if (oldPass.text != AkunState.listAkun[index].password) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text("Password lama salah!"),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating),
-                    );
-                    return;
-                  }
-                  if (newPass.text.length < 6) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text("Password baru minimal 6 karakter!"),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating),
-                    );
-                    return;
-                  }
-                  if (newPass.text != confirmPass.text) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text("Konfirmasi password tidak cocok!"),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating),
-                    );
-                    return;
-                  }
-                  // Update password
-                  AkunState.listAkun[index] = AkunModel(
-                    email: AkunState.listAkun[index].email,
-                    password: newPass.text,
-                  );
-                  AkunState.simpanAkun();
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Password berhasil diperbarui!"),
-                      backgroundColor: Color(0xFF8D6E63),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8D6E63),
-                  shape: RoundedRectangleBorder(
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Ubah Password",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3E2723))),
+              const SizedBox(height: 20),
+              TextField(
+                controller: oldPass,
+                obscureText: !oldVisible,
+                decoration: InputDecoration(
+                  labelText: "Password Lama",
+                  prefixIcon: const Icon(Icons.lock_outline_rounded),
+                  suffixIcon: IconButton(
+                    icon: Icon(oldVisible
+                        ? Icons.visibility_off
+                        : Icons.visibility),
+                    onPressed: () =>
+                        setModalState(() => oldVisible = !oldVisible),
+                  ),
+                  border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text("SIMPAN PASSWORD",
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              TextField(
+                controller: newPass,
+                obscureText: !newVisible,
+                decoration: InputDecoration(
+                  labelText: "Password Baru",
+                  prefixIcon: const Icon(Icons.lock_reset_rounded),
+                  suffixIcon: IconButton(
+                    icon: Icon(newVisible
+                        ? Icons.visibility_off
+                        : Icons.visibility),
+                    onPressed: () =>
+                        setModalState(() => newVisible = !newVisible),
+                  ),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: confirmPass,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Konfirmasi Password Baru",
+                  prefixIcon: const Icon(Icons.lock_rounded),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // ✅ Validasi lengkap
+                    if (oldPass.text.isEmpty ||
+                        newPass.text.isEmpty ||
+                        confirmPass.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Semua field harus diisi!"),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating),
+                      );
+                      return;
+                    }
+
+                    final index = AkunState.listAkun.indexWhere(
+                        (a) => a.email == SesiUser.emailAktif);
+                    if (index == -1) return;
+
+                    if (oldPass.text !=
+                        AkunState.listAkun[index].password) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Password lama salah!"),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating),
+                      );
+                      return;
+                    }
+                    if (newPass.text.length < 6) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content:
+                                Text("Password baru minimal 6 karakter!"),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating),
+                      );
+                      return;
+                    }
+                    if (newPass.text != confirmPass.text) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content:
+                                Text("Konfirmasi password tidak cocok!"),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating),
+                      );
+                      return;
+                    }
+
+                    // ✅ Update password di AkunState
+                    AkunState.listAkun[index] = AkunModel(
+                      email: AkunState.listAkun[index].email,
+                      password: newPass.text,
+                    );
+                    AkunState.simpanAkun();
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Password berhasil diubah!"),
+                        backgroundColor: Color(0xFF8D6E63),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8D6E63),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text("SIMPAN PASSWORD",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -405,7 +564,8 @@ class ProfileScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18)),
         backgroundColor: const Color(0xFFFDFBF7),
         title: Row(
           children: const [
@@ -426,7 +586,8 @@ class ProfileScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(ctx),
             child: const Text("BATAL",
                 style: TextStyle(
-                    color: Color(0xFF8D6E63), fontWeight: FontWeight.bold)),
+                    color: Color(0xFF8D6E63),
+                    fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -442,50 +603,14 @@ class ProfileScreen extends StatelessWidget {
               await AkunState.hapusSesi();
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const LoginScreen()),
               );
             },
             child: const Text("YA, KELUAR",
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ── Halaman Pesanan Saya ──
-class PesananSayaScreen extends StatelessWidget {
-  const PesananSayaScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFDFBF7),
-      appBar: AppBar(
-        title: const Text("Pesanan Saya",
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFF8D6E63),
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.shopping_bag_outlined,
-                size: 80, color: Color(0xFFBCAAA4)),
-            SizedBox(height: 16),
-            Text("Belum ada pesanan",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF5D4037))),
-            SizedBox(height: 6),
-            Text("Yuk mulai belanja dan buat pesanan pertamamu!",
-                style: TextStyle(fontSize: 12, color: Colors.black45)),
-          ],
-        ),
       ),
     );
   }
@@ -554,12 +679,12 @@ class _AlamatScreenState extends State<AlamatScreen> {
                   child: Icon(Icons.location_on_outlined,
                       color: Color(0xFF8D6E63)),
                 ),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide:
-                      const BorderSide(color: Color(0xFF8D6E63), width: 2),
+                  borderSide: const BorderSide(
+                      color: Color(0xFF8D6E63), width: 2),
                 ),
               ),
             ),
@@ -591,7 +716,8 @@ class _AlamatScreenState extends State<AlamatScreen> {
                 ),
                 child: const Text("SIMPAN ALAMAT",
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -614,7 +740,6 @@ class _AlamatScreenState extends State<AlamatScreen> {
           IconButton(
             icon: const Icon(Icons.add_rounded),
             onPressed: _tambahAlamat,
-            tooltip: "Tambah Alamat",
           )
         ],
       ),
@@ -633,7 +758,8 @@ class _AlamatScreenState extends State<AlamatScreen> {
                           color: Color(0xFF5D4037))),
                   const SizedBox(height: 6),
                   const Text("Tap tombol + untuk menambah alamat baru",
-                      style: TextStyle(fontSize: 12, color: Colors.black45)),
+                      style:
+                          TextStyle(fontSize: 12, color: Colors.black45)),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: _tambahAlamat,
@@ -673,13 +799,11 @@ class _AlamatScreenState extends State<AlamatScreen> {
                       child: const Icon(Icons.location_on_rounded,
                           color: Color(0xFF8D6E63), size: 20),
                     ),
-                    title: Text(
-                      "Alamat ${index + 1}",
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: Color(0xFF3E2723)),
-                    ),
+                    title: Text("Alamat ${index + 1}",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Color(0xFF3E2723))),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(_daftarAlamat[index],

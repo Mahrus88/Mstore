@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'cart_data.dart';
+import 'utils.dart';
 import 'order_success_screen.dart';
 import 'order_data.dart';
-import 'utils.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -26,7 +26,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     "Dompet Digital (OVO/GoPay/Dana)",
   ];
 
-  // ✅ Ongkir berdasarkan kota
   final Map<String, double> _ongkirPerKota = {
     "Pilih Kota": 0,
     "Pamekasan": 10000,
@@ -65,7 +64,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (_alamatController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Mohon isi alamat pengiriman terlebih dahulu."),
+          content: Text("Mohon isi alamat pengiriman."),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -123,6 +122,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           invoiceNumber: invoiceNumber,
           tanggal: tanggal,
           waktu: waktu,
+          metodePembayaran: _metodePembayaran, // ✅ kirim metode bayar
         ),
       ),
     );
@@ -151,7 +151,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Ringkasan Pesanan
                   _buildSectionTitle("Ringkasan Pesanan"),
                   Container(
                     decoration: BoxDecoration(
@@ -212,7 +211,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // ✅ Pilih Kota
                   _buildSectionTitle("Kota Pengiriman"),
                   Container(
                     decoration: BoxDecoration(
@@ -230,7 +228,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       child: DropdownButton<String>(
                         value: _kotaTerpilih,
                         isExpanded: true,
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                        icon: const Icon(
+                            Icons.keyboard_arrow_down_rounded,
                             color: Color(0xFF8D6E63)),
                         items: _ongkirPerKota.keys.map((kota) {
                           return DropdownMenuItem<String>(
@@ -247,8 +246,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                             : const Color(0xFF3E2723))),
                                 if (kota != "Pilih Kota")
                                   Text(
-                                    formatRupiah(
-                                        _ongkirPerKota[kota]!),
+                                    formatRupiah(_ongkirPerKota[kota]!),
                                     style: const TextStyle(
                                         fontSize: 12,
                                         color: Color(0xFF8D6E63),
@@ -265,7 +263,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Alamat Pengiriman
                   _buildSectionTitle("Alamat Pengiriman"),
                   Container(
                     decoration: BoxDecoration(
@@ -325,7 +322,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Metode Pembayaran
                   _buildSectionTitle("Metode Pembayaran"),
                   Container(
                     decoration: BoxDecoration(
@@ -368,7 +364,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Rincian Biaya
                   _buildSectionTitle("Rincian Biaya"),
                   Container(
                     decoration: BoxDecoration(
@@ -410,7 +405,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
 
-          // Tombol Pesan
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

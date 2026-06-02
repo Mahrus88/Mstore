@@ -5,6 +5,7 @@ import 'cart_data.dart';
 import 'favorite_data.dart';
 import 'product_data.dart';
 import 'utils.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -63,8 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
               // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Column(
+                children: [
+                  const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("MStore Bakery",
@@ -78,11 +79,21 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Color(0xFF8D6E63), fontSize: 11)),
                     ],
                   ),
-                  CircleAvatar(
-                    backgroundColor: Color(0xFF8D6E63),
-                    radius: 18,
-                    child: Icon(Icons.person_rounded,
-                        color: Colors.white, size: 20),
+                  // ✅ Ikon profil bisa diklik
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ProfileScreen()),
+                      );
+                    },
+                    child: const CircleAvatar(
+                      backgroundColor: Color(0xFF8D6E63),
+                      radius: 20,
+                      child: Icon(Icons.person_rounded,
+                          color: Colors.white, size: 22),
+                    ),
                   ),
                 ],
               ),
@@ -156,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   gridDelegate:
                       const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.72,
+                    childAspectRatio: 0.68, // ✅ Kartu lebih tinggi
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),
@@ -188,53 +199,55 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // ✅ Gambar lebih besar dan full
                             Stack(
                               children: [
-                                Container(
-                                  height: 130,
-                                  margin: const EdgeInsets.all(6),
-                                  width: double.infinity,
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.circular(14)),
-                                  child: Image.network(
-                                    produk['image'],
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (context, child,
-                                        loadingProgress) {
-                                      if (loadingProgress == null)
-                                        return child;
-                                      return Container(
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(18),
+                                    topRight: Radius.circular(18),
+                                  ),
+                                  child: SizedBox(
+                                    height: 160, // ✅ Lebih tinggi
+                                    width: double.infinity,
+                                    child: Image.network(
+                                      produk['image'],
+                                      fit: BoxFit.cover,
+                                      loadingBuilder: (context, child,
+                                          loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
+                                        return Container(
+                                          color: const Color(0xFFF5F0EA),
+                                          child: const Center(
+                                            child:
+                                                CircularProgressIndicator(
+                                              color: Color(0xFF8D6E63),
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder:
+                                          (ctx, err, stack) => Container(
                                         color: const Color(0xFFF5F0EA),
                                         child: const Center(
-                                          child:
-                                              CircularProgressIndicator(
-                                            color: Color(0xFF8D6E63),
-                                            strokeWidth: 2,
-                                          ),
+                                          child: Icon(
+                                              Icons.bakery_dining_rounded,
+                                              size: 50,
+                                              color: Color(0xFF8D6E63)),
                                         ),
-                                      );
-                                    },
-                                    errorBuilder:
-                                        (ctx, err, stack) => Container(
-                                      color: const Color(0xFFF5F0EA),
-                                      child: const Center(
-                                        child: Icon(
-                                            Icons.bakery_dining_rounded,
-                                            size: 40,
-                                            color: Color(0xFF8D6E63)),
                                       ),
                                     ),
                                   ),
                                 ),
                                 // Badge tag
                                 Positioned(
-                                  top: 12,
-                                  left: 12,
+                                  top: 10,
+                                  left: 10,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 7, vertical: 3),
+                                        horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF3E2723),
                                       borderRadius:
@@ -248,10 +261,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 FontWeight.bold)),
                                   ),
                                 ),
-                                // ✅ Tombol favorit
+                                // Tombol favorit
                                 Positioned(
-                                  top: 10,
-                                  right: 10,
+                                  top: 8,
+                                  right: 8,
                                   child: GestureDetector(
                                     onTap: () async {
                                       await FavoriteData.toggleFavorit(
@@ -302,11 +315,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
+
+                            // Info Produk
                             Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 10.0,
-                                  right: 10.0,
-                                  bottom: 10.0),
+                              padding: const EdgeInsets.all(10),
                               child: Column(
                                 crossAxisAlignment:
                                     CrossAxisAlignment.start,
@@ -329,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fontSize: 10,
                                             color: Colors.grey)),
                                   ]),
-                                  const SizedBox(height: 5),
+                                  const SizedBox(height: 6),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,

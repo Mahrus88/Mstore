@@ -7,16 +7,17 @@ class OrderSuccessScreen extends StatelessWidget {
   final String invoiceNumber;
   final String tanggal;
   final String waktu;
+  final String metodePembayaran;
 
   const OrderSuccessScreen({
     super.key,
     required this.invoiceNumber,
     required this.tanggal,
     required this.waktu,
+    required this.metodePembayaran,
   });
 
-  // ✅ Nomor WhatsApp MStore
-  static const String nomorWA = "083861780827";
+  static const String nomorWA = "6281234567890";
 
   Future<void> _bukaWhatsApp(BuildContext context, String invoice) async {
     final String pesan =
@@ -24,18 +25,15 @@ class OrderSuccessScreen extends StatelessWidget {
         "No. Invoice: *$invoice*\n"
         "Tanggal: $tanggal\n\n"
         "Mohon informasinya, terima kasih!";
-
     final Uri waUrl = Uri.parse(
         "https://wa.me/$nomorWA?text=${Uri.encodeComponent(pesan)}");
-
     if (await canLaunchUrl(waUrl)) {
       await launchUrl(waUrl, mode: LaunchMode.externalApplication);
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-                "WhatsApp tidak ditemukan. Pastikan WhatsApp sudah terinstall."),
+            content: Text("WhatsApp tidak ditemukan."),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -104,7 +102,7 @@ class OrderSuccessScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                // Struk digital
+                // ✅ Struk digital dengan metode pembayaran
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20.0),
@@ -136,8 +134,8 @@ class OrderSuccessScreen extends StatelessWidget {
                       ),
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12.0),
-                        child: Divider(
-                            height: 1, color: Color(0xFFF5F0EA)),
+                        child:
+                            Divider(height: 1, color: Color(0xFFF5F0EA)),
                       ),
                       _buildRow("No. Invoice", invoiceNumber,
                           isBold: true),
@@ -145,6 +143,9 @@ class OrderSuccessScreen extends StatelessWidget {
                       _buildRow("Tanggal", tanggal),
                       const SizedBox(height: 10),
                       _buildRow("Waktu Bayar", waktu),
+                      const SizedBox(height: 10),
+                      // ✅ Metode pembayaran ditampilkan
+                      _buildRow("Metode Bayar", metodePembayaran),
                       const SizedBox(height: 10),
                       _buildRow(
                           "Metode Pengiriman", "Kurir Kilat MStore"),
@@ -214,7 +215,7 @@ class OrderSuccessScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // ✅ Tombol WhatsApp yang berfungsi sungguhan
+                // Tombol WhatsApp
                 SizedBox(
                   width: double.infinity,
                   height: 48,
@@ -256,14 +257,18 @@ class OrderSuccessScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
-            style: const TextStyle(fontSize: 12, color: Colors.black45)),
-        Text(value,
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: isBold || statusColor != null
-                    ? FontWeight.bold
-                    : FontWeight.normal,
-                color: statusColor ?? const Color(0xFF3E2723))),
+            style:
+                const TextStyle(fontSize: 12, color: Colors.black45)),
+        Flexible(
+          child: Text(value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isBold || statusColor != null
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  color: statusColor ?? const Color(0xFF3E2723))),
+        ),
       ],
     );
   }
