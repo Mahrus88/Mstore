@@ -211,6 +211,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  // ✅ Dropdown kota yang terlihat di Android (tema terang)
                   _buildSectionTitle("Kota Pengiriman"),
                   Container(
                     decoration: BoxDecoration(
@@ -224,40 +225,56 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 4),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _kotaTerpilih,
-                        isExpanded: true,
-                        icon: const Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: Color(0xFF8D6E63)),
-                        items: _ongkirPerKota.keys.map((kota) {
-                          return DropdownMenuItem<String>(
-                            value: kota,
-                            child: Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(kota,
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        color: kota == "Pilih Kota"
-                                            ? Colors.grey
-                                            : const Color(0xFF3E2723))),
-                                if (kota != "Pilih Kota")
+                    child: Theme(
+                      // ✅ Paksa tema terang agar dropdown putih di semua HP
+                      data: Theme.of(context).copyWith(
+                        canvasColor: Colors.white,
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _kotaTerpilih,
+                          isExpanded: true,
+                          dropdownColor: Colors.white, // ✅ background dropdown putih
+                          style: const TextStyle(
+                            color: Color(0xFF3E2723),
+                            fontSize: 13,
+                          ),
+                          icon: const Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Color(0xFF8D6E63)),
+                          items: _ongkirPerKota.keys.map((kota) {
+                            return DropdownMenuItem<String>(
+                              value: kota,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
                                   Text(
-                                    formatRupiah(_ongkirPerKota[kota]!),
-                                    style: const TextStyle(
+                                    kota,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: kota == "Pilih Kota"
+                                          ? Colors.grey
+                                          : const Color(0xFF3E2723),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  if (kota != "Pilih Kota")
+                                    Text(
+                                      formatRupiah(_ongkirPerKota[kota]!),
+                                      style: const TextStyle(
                                         fontSize: 12,
                                         color: Color(0xFF8D6E63),
-                                        fontWeight: FontWeight.w500),
-                                  ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (val) =>
-                            setState(() => _kotaTerpilih = val!),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) =>
+                              setState(() => _kotaTerpilih = val!),
+                        ),
                       ),
                     ),
                   ),

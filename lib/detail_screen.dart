@@ -15,6 +15,52 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   int _qty = 1;
 
+  // ✅ Helper load gambar lokal atau network
+  Widget _buildGambar(String path, {double height = 240}) {
+    if (path.startsWith('assets/')) {
+      return Image.asset(
+        path,
+        fit: BoxFit.cover,
+        height: height,
+        width: double.infinity,
+        errorBuilder: (ctx, err, stack) => Container(
+          height: height,
+          color: const Color(0xFFF5F0EA),
+          child: const Center(
+            child: Icon(Icons.bakery_dining_rounded,
+                size: 70, color: Color(0xFF8D6E63)),
+          ),
+        ),
+      );
+    } else {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        height: height,
+        width: double.infinity,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            height: height,
+            color: const Color(0xFFF5F0EA),
+            child: const Center(
+              child: CircularProgressIndicator(
+                  color: Color(0xFF8D6E63)),
+            ),
+          );
+        },
+        errorBuilder: (ctx, err, stack) => Container(
+          height: height,
+          color: const Color(0xFFF5F0EA),
+          child: const Center(
+            child: Icon(Icons.bakery_dining_rounded,
+                size: 70, color: Color(0xFF8D6E63)),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
@@ -28,7 +74,8 @@ class _DetailScreenState extends State<DetailScreen> {
       appBar: AppBar(
         title: Text(
           product['name']?.toString() ?? 'Detail Produk',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: const TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: const Color(0xFF8D6E63),
         foregroundColor: Colors.white,
@@ -37,15 +84,17 @@ class _DetailScreenState extends State<DetailScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        // ✅ Tombol favorit di AppBar
         actions: [
           IconButton(
             icon: Icon(
-              isFavorit ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+              isFavorit
+                  ? Icons.favorite_rounded
+                  : Icons.favorite_border_rounded,
               color: isFavorit ? Colors.red : Colors.white,
             ),
             onPressed: () async {
-              await FavoriteData.toggleFavorit(Map<String, dynamic>.from(product));
+              await FavoriteData.toggleFavorit(
+                  Map<String, dynamic>.from(product));
               setState(() {});
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -72,55 +121,24 @@ class _DetailScreenState extends State<DetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Gambar Produk
-                    Container(
-                      height: 240,
-                      width: double.infinity,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F0EA),
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: urlGambar.isNotEmpty
-                          ? Image.network(
-                              urlGambar,
-                              fit: BoxFit.cover,
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return const Center(
-                                  child: CircularProgressIndicator(
-                                      color: Color(0xFF8D6E63)),
-                                );
-                              },
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Center(
-                                child: Icon(Icons.bakery_dining_rounded,
-                                    size: 70, color: Color(0xFF8D6E63)),
-                              ),
-                            )
-                          : const Center(
-                              child: Icon(Icons.bakery_dining_rounded,
-                                  size: 70, color: Color(0xFF8D6E63)),
-                            ),
+                    // ✅ Gambar pakai helper
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: _buildGambar(urlGambar, height: 240),
                     ),
                     const SizedBox(height: 20),
 
                     // Kategori & Rating
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF8D6E63).withOpacity(0.15),
+                            color: const Color(0xFF8D6E63)
+                                .withOpacity(0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -136,14 +154,17 @@ class _DetailScreenState extends State<DetailScreen> {
                             const Icon(Icons.star_rounded,
                                 color: Colors.amber, size: 18),
                             const SizedBox(width: 2),
-                            Text("${product['rating'] ?? '4.5'}",
+                            Text(
+                                "${product['rating'] ?? '4.5'}",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13)),
                             const SizedBox(width: 4),
-                            Text("(${product['ratingCount'] ?? 0} ulasan)",
+                            Text(
+                                "(${product['ratingCount'] ?? 0} ulasan)",
                                 style: const TextStyle(
-                                    fontSize: 11, color: Colors.grey)),
+                                    fontSize: 11,
+                                    color: Colors.grey)),
                           ],
                         ),
                       ],
@@ -182,7 +203,9 @@ class _DetailScreenState extends State<DetailScreen> {
                       product['desc']?.toString() ??
                           'Menu roti panggang lezat buatan MStore Bakery.',
                       style: const TextStyle(
-                          color: Colors.black54, fontSize: 13, height: 1.6),
+                          color: Colors.black54,
+                          fontSize: 13,
+                          height: 1.6),
                     ),
 
                     if (product['tag'] != null) ...[
@@ -214,7 +237,8 @@ class _DetailScreenState extends State<DetailScreen> {
 
                     // Qty Selector
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
                       children: [
                         const Text("Jumlah",
                             style: TextStyle(
@@ -224,7 +248,8 @@ class _DetailScreenState extends State<DetailScreen> {
                         Row(children: [
                           GestureDetector(
                             onTap: () {
-                              if (_qty > 1) setState(() => _qty--);
+                              if (_qty > 1)
+                                setState(() => _qty--);
                             },
                             child: Container(
                               width: 34,
@@ -233,7 +258,8 @@ class _DetailScreenState extends State<DetailScreen> {
                                 color: _qty > 1
                                     ? const Color(0xFF3E2723)
                                     : Colors.grey.shade300,
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius:
+                                    BorderRadius.circular(8),
                               ),
                               child: Icon(Icons.remove_rounded,
                                   color: _qty > 1
@@ -243,8 +269,8 @@ class _DetailScreenState extends State<DetailScreen> {
                             ),
                           ),
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16),
                             child: Text("$_qty",
                                 style: const TextStyle(
                                     fontSize: 18,
@@ -258,7 +284,8 @@ class _DetailScreenState extends State<DetailScreen> {
                               height: 34,
                               decoration: BoxDecoration(
                                 color: const Color(0xFF3E2723),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius:
+                                    BorderRadius.circular(8),
                               ),
                               child: const Icon(Icons.add_rounded,
                                   color: Colors.white, size: 18),
@@ -277,11 +304,13 @@ class _DetailScreenState extends State<DetailScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
                         children: [
                           const Text("Total Harga",
                               style: TextStyle(
-                                  color: Colors.black54, fontSize: 13)),
+                                  color: Colors.black54,
+                                  fontSize: 13)),
                           Text(formatRupiah(totalHarga),
                               style: const TextStyle(
                                   fontSize: 16,

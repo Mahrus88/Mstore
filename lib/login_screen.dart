@@ -26,12 +26,18 @@ class AkunModel {
 }
 
 class AkunState {
+  // ✅ Akun default tidak di-reset
   static List<AkunModel> listAkun = [
     const AkunModel(email: "admin@bakery.com", password: "admin123"),
     const AkunModel(email: "mahrus@bakery.com", password: "mahrus123"),
   ];
 
+  static bool _sudahDimuat = false; // ✅ Cegah load berulang
+
   static Future<void> muatAkun() async {
+    if (_sudahDimuat) return; // ✅ Kalau sudah dimuat skip
+    _sudahDimuat = true;
+
     final prefs = await SharedPreferences.getInstance();
     final String? data = prefs.getString('daftar_akun');
     if (data != null) {

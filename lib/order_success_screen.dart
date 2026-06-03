@@ -17,7 +17,7 @@ class OrderSuccessScreen extends StatelessWidget {
     required this.metodePembayaran,
   });
 
-  static const String nomorWA = "6281234567890";
+  static const String nomorWA = "083861780827";
 
   Future<void> _bukaWhatsApp(BuildContext context, String invoice) async {
     final String pesan =

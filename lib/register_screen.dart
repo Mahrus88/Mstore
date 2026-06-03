@@ -51,7 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return;
       }
 
-      // Simpan akun ke SharedPreferences
+      // ✅ Simpan akun ke SharedPreferences
       await AkunState.tambahAkun(email, password);
 
       setState(() => _isLoading = false);
@@ -79,7 +79,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFDFBF7),
       appBar: AppBar(
-        title: const Text("Daftar Akun",
+        // ✅ Nama diubah jadi MStore Bakery
+        title: const Text("MStore Bakery",
             style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF8D6E63),
         foregroundColor: Colors.white,
@@ -95,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const Icon(Icons.bakery_dining_rounded,
                     size: 70, color: Color(0xFF8D6E63)),
                 const SizedBox(height: 10),
-                const Text("Gabung MStore",
+                const Text("Daftar Akun Baru",
                     style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -110,7 +111,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   validator: (value) {
                     if (value == null || value.isEmpty)
                       return "Nama tidak boleh kosong";
-                    if (value.length < 3) return "Nama minimal 3 karakter";
+                    if (value.length < 3)
+                      return "Nama minimal 3 karakter";
                     return null;
                   },
                   decoration: InputDecoration(
@@ -246,7 +248,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           )
                         : const Text("DAFTAR SEKARANG",
                             style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold)),
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(height: 20),

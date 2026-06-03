@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'splash_screen.dart';
 import 'onboarding_screen.dart';
+import 'login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,9 @@ void main() async {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
+
+  // ✅ Muat akun tersimpan saat pertama buka app
+  await AkunState.muatAkun();
 
   final prefs = await SharedPreferences.getInstance();
   final bool sudahOnboarding =
@@ -72,7 +76,7 @@ class MyApp extends StatelessWidget {
           },
         ),
       ),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light, // ✅ Paksa light mode agar konsisten
       home: sudahOnboarding
           ? const SplashScreen()
           : const OnboardingScreen(),

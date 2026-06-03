@@ -18,7 +18,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = "Semua";
   String _searchQuery = "";
   final _searchController = TextEditingController();
-
   final List<Map<String, dynamic>> menuBakery = ProductData.menuBakery;
 
   List<Map<String, dynamic>> get filteredMenu {
@@ -50,6 +49,52 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  // ✅ Helper load gambar lokal atau network
+  Widget _buildGambar(String path, {double height = 160}) {
+    if (path.startsWith('assets/')) {
+      return Image.asset(
+        path,
+        fit: BoxFit.cover,
+        height: height,
+        width: double.infinity,
+        errorBuilder: (ctx, err, stack) => Container(
+          height: height,
+          color: const Color(0xFFF5F0EA),
+          child: const Center(
+            child: Icon(Icons.bakery_dining_rounded,
+                size: 50, color: Color(0xFF8D6E63)),
+          ),
+        ),
+      );
+    } else {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        height: height,
+        width: double.infinity,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            height: height,
+            color: const Color(0xFFF5F0EA),
+            child: const Center(
+              child: CircularProgressIndicator(
+                  color: Color(0xFF8D6E63), strokeWidth: 2),
+            ),
+          );
+        },
+        errorBuilder: (ctx, err, stack) => Container(
+          height: height,
+          color: const Color(0xFFF5F0EA),
+          child: const Center(
+            child: Icon(Icons.bakery_dining_rounded,
+                size: 50, color: Color(0xFF8D6E63)),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,15 +124,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Color(0xFF8D6E63), fontSize: 11)),
                     ],
                   ),
-                  // ✅ Ikon profil bisa diklik
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ProfileScreen()),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ProfileScreen()),
+                    ),
                     child: const CircleAvatar(
                       backgroundColor: Color(0xFF8D6E63),
                       radius: 20,
@@ -105,8 +147,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 onChanged: (val) => setState(() => _searchQuery = val),
                 decoration: InputDecoration(
                   hintText: "Cari produk bakery...",
-                  hintStyle:
-                      const TextStyle(fontSize: 13, color: Colors.grey),
+                  hintStyle: const TextStyle(
+                      fontSize: 13, color: Colors.grey),
                   prefixIcon: const Icon(Icons.search_rounded,
                       color: Color(0xFF8D6E63)),
                   suffixIcon: _searchQuery.isNotEmpty
@@ -142,7 +184,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Empty state
               if (filteredMenu.isEmpty)
                 const Center(
                   child: Padding(
@@ -167,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   gridDelegate:
                       const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.68, // ✅ Kartu lebih tinggi
+                    childAspectRatio: 0.68,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),
@@ -199,7 +240,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // ✅ Gambar lebih besar dan full
                             Stack(
                               children: [
                                 ClipRRect(
@@ -207,39 +247,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     topLeft: Radius.circular(18),
                                     topRight: Radius.circular(18),
                                   ),
-                                  child: SizedBox(
-                                    height: 160, // ✅ Lebih tinggi
-                                    width: double.infinity,
-                                    child: Image.network(
-                                      produk['image'],
-                                      fit: BoxFit.cover,
-                                      loadingBuilder: (context, child,
-                                          loadingProgress) {
-                                        if (loadingProgress == null)
-                                          return child;
-                                        return Container(
-                                          color: const Color(0xFFF5F0EA),
-                                          child: const Center(
-                                            child:
-                                                CircularProgressIndicator(
-                                              color: Color(0xFF8D6E63),
-                                              strokeWidth: 2,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      errorBuilder:
-                                          (ctx, err, stack) => Container(
-                                        color: const Color(0xFFF5F0EA),
-                                        child: const Center(
-                                          child: Icon(
-                                              Icons.bakery_dining_rounded,
-                                              size: 50,
-                                              color: Color(0xFF8D6E63)),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                  child: _buildGambar(produk['image'],
+                                      height: 160),
                                 ),
                                 // Badge tag
                                 Positioned(
@@ -315,8 +324,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
-
-                            // Info Produk
                             Padding(
                               padding: const EdgeInsets.all(10),
                               child: Column(
