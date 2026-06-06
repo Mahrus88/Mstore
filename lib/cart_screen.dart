@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'cart_data.dart';
 import 'utils.dart';
 import 'checkout_screen.dart';
+import 'image_helper.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -107,18 +108,13 @@ class _CartScreenState extends State<CartScreen> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      Container(
-                        width: 70,
-                        height: 70,
-                        clipBehavior: Clip.antiAlias,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF5F0EA),
-                          borderRadius: BorderRadius.circular(10),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: buildGambarProduk(
+                          path: item.image,
+                          width: 70,
+                          height: 70,
                         ),
-                        child: item.image.isNotEmpty
-                            ? Image.network(item.image, fit: BoxFit.cover)
-                            : const Icon(Icons.bakery_dining_rounded,
-                                color: Color(0xFF8D6E63)),
                       ),
                       const SizedBox(width: 14),
                       Expanded(

@@ -4,6 +4,7 @@ import 'favorite_data.dart';
 import 'utils.dart';
 import 'detail_screen.dart';
 import 'cart_data.dart';
+import 'image_helper.dart';
 
 class FavoritScreen extends StatefulWidget {
   const FavoritScreen({super.key});
@@ -68,7 +69,7 @@ class _FavoritScreenState extends State<FavoritScreen> {
                   gridDelegate:
                       const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.78,
+                    childAspectRatio: 0.75,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),
@@ -100,27 +101,15 @@ class _FavoritScreenState extends State<FavoritScreen> {
                           children: [
                             Stack(
                               children: [
-                                Container(
-                                  height: 130,
-                                  margin: const EdgeInsets.all(6),
-                                  width: double.infinity,
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.circular(14)),
-                                  child: Image.network(
-                                    produk['image'],
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (ctx, err, stack) =>
-                                        Container(
-                                      color: const Color(0xFFF5F0EA),
-                                      child: const Center(
-                                        child: Icon(
-                                            Icons.bakery_dining_rounded,
-                                            size: 40,
-                                            color: Color(0xFF8D6E63)),
-                                      ),
-                                    ),
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(18),
+                                    topRight: Radius.circular(18),
+                                  ),
+                                  child: buildGambarProduk(
+                                    path: produk['image'],
+                                    height: 130,
+                                    width: double.infinity,
                                   ),
                                 ),
                                 Positioned(
@@ -173,6 +162,7 @@ class _FavoritScreenState extends State<FavoritScreen> {
                                 crossAxisAlignment:
                                     CrossAxisAlignment.start,
                                 children: [
+                                  const SizedBox(height: 8),
                                   Text(produk['name'],
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -196,7 +186,8 @@ class _FavoritScreenState extends State<FavoritScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(formatRupiah(produk['price']),
+                                      Text(
+                                          formatRupiah(produk['price']),
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               color: Color(0xFF8D6E63),

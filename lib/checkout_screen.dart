@@ -5,6 +5,7 @@ import 'cart_data.dart';
 import 'utils.dart';
 import 'order_success_screen.dart';
 import 'order_data.dart';
+import 'image_helper.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -122,7 +123,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           invoiceNumber: invoiceNumber,
           tanggal: tanggal,
           waktu: waktu,
-          metodePembayaran: _metodePembayaran, // ✅ kirim metode bayar
+          metodePembayaran: _metodePembayaran,
         ),
       ),
     );
@@ -151,6 +152,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Ringkasan Pesanan
                   _buildSectionTitle("Ringkasan Pesanan"),
                   Container(
                     decoration: BoxDecoration(
@@ -172,20 +174,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ListTile(
                               contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 14, vertical: 4),
-                              leading: Container(
-                                width: 46,
-                                height: 46,
-                                clipBehavior: Clip.antiAlias,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: const Color(0xFFF5F0EA),
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: buildGambarProduk(
+                                  path: item.image,
+                                  width: 46,
+                                  height: 46,
                                 ),
-                                child: item.image.isNotEmpty
-                                    ? Image.network(item.image,
-                                        fit: BoxFit.cover)
-                                    : const Icon(
-                                        Icons.bakery_dining_rounded,
-                                        color: Color(0xFF8D6E63)),
                               ),
                               title: Text(item.name,
                                   style: const TextStyle(
@@ -211,7 +206,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // ✅ Dropdown kota yang terlihat di Android (tema terang)
+                  // Kota Pengiriman
                   _buildSectionTitle("Kota Pengiriman"),
                   Container(
                     decoration: BoxDecoration(
@@ -226,7 +221,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 4),
                     child: Theme(
-                      // ✅ Paksa tema terang agar dropdown putih di semua HP
                       data: Theme.of(context).copyWith(
                         canvasColor: Colors.white,
                       ),
@@ -234,11 +228,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         child: DropdownButton<String>(
                           value: _kotaTerpilih,
                           isExpanded: true,
-                          dropdownColor: Colors.white, // ✅ background dropdown putih
+                          dropdownColor: Colors.white,
                           style: const TextStyle(
-                            color: Color(0xFF3E2723),
-                            fontSize: 13,
-                          ),
+                              color: Color(0xFF3E2723), fontSize: 13),
                           icon: const Icon(
                               Icons.keyboard_arrow_down_rounded,
                               color: Color(0xFF8D6E63)),
@@ -249,24 +241,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    kota,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: kota == "Pilih Kota"
-                                          ? Colors.grey
-                                          : const Color(0xFF3E2723),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
+                                  Text(kota,
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: kota == "Pilih Kota"
+                                              ? Colors.grey
+                                              : const Color(0xFF3E2723),
+                                          fontWeight: FontWeight.w500)),
                                   if (kota != "Pilih Kota")
                                     Text(
-                                      formatRupiah(_ongkirPerKota[kota]!),
+                                      formatRupiah(
+                                          _ongkirPerKota[kota]!),
                                       style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Color(0xFF8D6E63),
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                          fontSize: 12,
+                                          color: Color(0xFF8D6E63),
+                                          fontWeight: FontWeight.w500),
                                     ),
                                 ],
                               ),
@@ -280,6 +269,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  // Alamat Pengiriman
                   _buildSectionTitle("Alamat Pengiriman"),
                   Container(
                     decoration: BoxDecoration(
@@ -339,6 +329,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  // Metode Pembayaran
                   _buildSectionTitle("Metode Pembayaran"),
                   Container(
                     decoration: BoxDecoration(
@@ -381,6 +372,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  // Rincian Biaya
                   _buildSectionTitle("Rincian Biaya"),
                   Container(
                     decoration: BoxDecoration(
@@ -422,6 +414,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
 
+          // Tombol Pesan
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
